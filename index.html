@@ -10,47 +10,80 @@
     <script type="module">
         // Find the latest version by visiting https://unpkg.com/three. The URL will
         // redirect to the newest stable release.
-        import * as THREE from 'https://unpkg.com/three/build/three.module.js';
+		import * as THREE from 
+			'https://unpkg.com/three/build/three.module.js';
+		import { GLTFLoader } from 
+			'https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/GLTFLoader.js';
         const scene = new THREE.Scene();
 		const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 		const renderer = new THREE.WebGLRenderer();
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		document.body.appendChild( renderer.domElement );
-		// const geometry = new THREE.BoxGeometry();
-		// console.log(geometry);
-		// const material = new THREE.MeshPhysicalMaterial({ color: 0x00ffff });
 
+		const loader = new GLTFLoader();
+
+		var model;
+		//load gets 3callbacks
+		loader.load(
+			// resource URL
+			'assets/soulless/scene.gltf',
+			// called when the resource is loaded
+			function ( gltf ) {
+				model = gltf.scene;
+				model.scale.set(.02, .02, .02);
+				scene.add( model );
+			},
+			// called while loading is progressing
+			function ( xhr ) {
+				console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+			},
+			// called when loading has errors
+			function ( error ) {
+				console.log( 'An error happened' );
+			}
+		);
 
 		const geometry = new THREE.TorusGeometry( 5, 2, 10, 50, 15);
-		const material = new THREE.MeshPhongMaterial( { color: 721042 } );
-		const torus = new THREE.Mesh( geometry, material );
-		scene.add( torus );
-		// const sphere = new THREE.SphereGeometry( 0.5, 16, 8 );
-		// scene.add(sphere);
-		// const cube = new THREE.Mesh( geometry, material );
-		// scene.add( cube );
+		const material = new THREE.MeshPhongMaterial( { color: 0xffffff } );
 
-		camera.position.z = 30;
+		camera.position.z = 10;
+		camera.position.y = 5;
+
 
 		// const directionalLight = new THREE.DirectionalLight( 0xf00fff, 2.3 );
 		// directionalLight.position.set(1, 0, 1);
 		// scene.add( directionalLight );
 
-		const spotLight = new THREE.SpotLight( 0xff00ff, 6 );
-		spotLight.position.set( 10, 8, 10 );
-		scene.add( spotLight );
+		// const spotLight = new THREE.SpotLight( 0xff00ff, 10 );
+		// spotLight.position.set( 10, 8, 10 );
+		// scene.add( spotLight );
+		let lightHolder = new THREE.Object3D();
+		const light = new THREE.PointLight( 0xffffff, 35, 110, 1.2 );
+		light.position.set( 50, 50, 50 );
+		// scene.add( light );
+		// light.color.setHex( 0xff0ff0 );
+		lightHolder.add( light );
+		scene.add( lightHolder );
+		// var pivot = new THREE.Object3D();
+		// pivot.add(model);
 
-		// const spotLightHelper = new THREE.SpotLightHelper( spotLight );
-		// scene.add( spotLightHelper );
 
+		const pointLightHelper = new THREE.PointLightHelper( light, 1 );
+		scene.add( pointLightHelper );
+		let time = 0;
 
 		function animate() {
 			requestAnimationFrame( animate );
 			renderer.render( scene, camera );
-			torus.rotation.y += 0.001;
-			torus.rotation.x += 0.013;
-			torus.rotation.z += 0.002;
-			console.log(cube.rotation);
+			// if (model)
+			// model.rotation.x += 0.009;
+			console.log(light.color.r);
+			var r = (.5*Math.sin(time*.2+.5))+.5;
+			var b = .5*Math.sin(time*.3)+.5;
+			light.color.setRGB(r,0,b);
+			lightHolder.rotation.y += .01;
+			lightHolder.rotation.z += .01;
+			time += .1;
 		}
 		animate();
 
